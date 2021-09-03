@@ -68,12 +68,21 @@ public class RedefiningClassLoader extends org.apache.bcel.util.ClassLoader {
   }
 
   @Override
-  protected Class<?> loadClass(String class_name, boolean resolve) throws ClassNotFoundException {
+  protected Class<?> loadClass(String className, boolean resolve) throws ClassNotFoundException {
     try {
-      return super.loadClass(class_name, resolve);
+      int i = className.lastIndexOf('.');
+      if (i != -1) {
+        String pkgName = className.substring(0, i);
+        if (getPackage(pkgName) == null) {
+          super.definePackage(pkgName, null, null, null, null,
+                  null, null, null);
+        }
+      }
+      return super.loadClass(className, resolve);
     }
     catch (ClassFormatException e) {
-      throw new RuntimeException("Unable to load class " + class_name, e);
+      throw new RuntimeException("Unable to load class " + className, e);
     }
   }
+  
 }
